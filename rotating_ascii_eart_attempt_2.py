@@ -120,11 +120,8 @@ while running:
             running = False
 
     pv.screen.fill(pv.background)
-    globe.rotate(globe.findCenter(), np.array([[cos(spin), -sin(spin), 0, 0],
-                                               [sin(spin), cos(spin), 0, 0],
-                                               [0, 0, 1, 0],
-                                               [0, 0, 0, 1]]))
+    globe.rotateAll(spin)
     pv.display()
 
     pg.display.update()
-    spin += 0.01
+    spin += 0.05
