@@ -10,7 +10,7 @@ HEIGHT = 800
 
 R = 250
 MAP_WIDTH = 101
-MAP_HEIGHT = 32
+MAP_HEIGHT = 31
 
 pg.init()
 
