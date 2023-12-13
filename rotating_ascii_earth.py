@@ -9,15 +9,15 @@ WIDTH = 800
 HEIGHT = 800
 
 R = 250
-MAP_WIDTH = 101
-MAP_HEIGHT = 31
+MAP_WIDTH = 140
+MAP_HEIGHT = 42
 
 pg.init()
 
 my_font = pg.font.SysFont('arial', 14)
 
 with open('image.txt', 'r') as file:
-    data = [line.strip() for line in file.readlines()]
+    data = file.read().replace('\n', '').splitlines()
 
 ascii_chars = []
 for line in data:
@@ -45,12 +45,10 @@ class Projection:
         for surface in self.surfaces.values():
             i = 0
             for node in surface.nodes:
+                self.text = inverted_ascii_chars[i % len(ascii_chars)]  # Use modulo to prevent index out of range
+                self.text_surface = my_font.render(self.text, False, (0, 255, 0))
                 if node[1] > 0:
-                    x, y = int(WIDTH / 2 + node[0]), int(HEIGHT / 2 + node[2])
-                    char_index = int((y % HEIGHT) * WIDTH + x) % len(inverted_ascii_chars)
-                    self.text = inverted_ascii_chars[char_index]
-                    self.text_surface = my_font.render(self.text, False, (0, 255, 0))
-                    self.screen.blit(self.text_surface, (x, y))
+                    self.screen.blit(self.text_surface, (WIDTH / 2 + int(node[0]), HEIGHT / 2 + int(node[2])))
                 i += 1
 
     def rotateAll(self, theta):
@@ -76,7 +74,7 @@ class Projection:
 
 class Object:
     def __init__(self):
-        self.nodes = np.zeros((0, 4))
+        self.nodes = np.ones((0, 4))
 
     def addNodes(self, node_array):
         ones_column = np.ones((len(node_array), 1))
@@ -103,7 +101,7 @@ for i in range(MAP_HEIGHT + 1):
         z = round(R * cos(lat), 2)
         xyz.append((x, y, z))
 
-spin = 0
+spin = 0.01
 running = True
 
 pv = Projection(WIDTH, HEIGHT)
@@ -113,7 +111,7 @@ globe.addNodes(np.array(globe_nodes))
 pv.addSurface('globe', globe)
 
 while running:
-    clock.tick(FPS)
+    dt = clock.tick(FPS)/1000.0
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -127,4 +125,4 @@ while running:
     pv.display()
 
     pg.display.update()
-    spin += 0.01
+    spin += 0.01 * dt

@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e884a418-a7ee-4114-aded-648d546f7775" name="Changes" comment="" />
+    <list default="true" id="e884a418-a7ee-4114-aded-648d546f7775" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/image.txt" beforeDir="false" afterPath="$PROJECT_DIR$/image.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rotating_ascii_eart_attempt_2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/rotating_ascii_earth.py" beforeDir="false" afterPath="$PROJECT_DIR$/rotating_ascii_earth.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
