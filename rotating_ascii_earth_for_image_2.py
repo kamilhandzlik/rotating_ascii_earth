@@ -1,8 +1,8 @@
 import pygame as pg
 import numpy as np
 from math import pi, sin, cos
-import Projection
-import Object
+from rotating_ascii_earth_for_image import Projection
+from rotating_ascii_earth_for_image import Object
 
 clock = pg.time.Clock()
 FPS = 30
