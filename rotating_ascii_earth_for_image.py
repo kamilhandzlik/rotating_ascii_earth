@@ -9,15 +9,15 @@ WIDTH = 800
 HEIGHT = 800
 
 R = 250
-MAP_WIDTH = 140
-MAP_HEIGHT = 42
+MAP_WIDTH = 139
+MAP_HEIGHT = 40
 
 pg.init()
 
-my_font = pg.font.SysFont('arial', 14)
+my_font = pg.font.SysFont('arial', 20)
 
 with open('image.txt', 'r') as file:
-    data = file.read().replace('\n', '').splitlines()
+    data = [file.read().replace('\n', '')]
 
 ascii_chars = []
 for line in data:
@@ -45,9 +45,9 @@ class Projection:
         for surface in self.surfaces.values():
             i = 0
             for node in surface.nodes:
-                self.text = inverted_ascii_chars[i % len(ascii_chars)]  # Use modulo to prevent index out of range
+                self.text = inverted_ascii_chars[i]
                 self.text_surface = my_font.render(self.text, False, (0, 255, 0))
-                if node[1] > 0:
+                if i > MAP_WIDTH - 1 and i < (MAP_WIDTH * MAP_HEIGHT - MAP_WIDTH) and node[1] > 0:
                     self.screen.blit(self.text_surface, (WIDTH / 2 + int(node[0]), HEIGHT / 2 + int(node[2])))
                 i += 1
 
@@ -62,14 +62,6 @@ class Projection:
                                [0, 0, 1, 0],
                                [0, 0, 0, 1]])
             surface.rotate(center, matrix)
-
-            # Update the screen coordinates after rotation
-            rotated_nodes = []
-            for node in surface.nodes:
-                rotated_node = center + np.matmul(matrix, node - center)
-                rotated_nodes.append(rotated_node)
-
-            surface.nodes = np.array(rotated_nodes)
 
 
 class Object:
@@ -93,7 +85,7 @@ class Object:
 xyz = []
 
 for i in range(MAP_HEIGHT + 1):
-    lat = (pi / MAP_HEIGHT) + i
+    lat = (pi / MAP_HEIGHT) * i  #finally found reason image was wrogly displayed i have put "+" instead of "*"
     for j in range(MAP_WIDTH + 1):
         lon = (2 * pi / MAP_WIDTH) * j
         x = round(R * sin(lat) * cos(lon), 2)
@@ -111,7 +103,7 @@ globe.addNodes(np.array(globe_nodes))
 pv.addSurface('globe', globe)
 
 while running:
-    dt = clock.tick(FPS)/1000.0
+    dt = clock.tick(FPS)/10000.0
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
