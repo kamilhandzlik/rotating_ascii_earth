@@ -1,8 +1,6 @@
 import pygame as pg
 import numpy as np
 from math import pi, sin, cos
-from rotating_ascii_earth_for_image import Projection
-from rotating_ascii_earth_for_image import Object
 
 clock = pg.time.Clock()
 FPS = 30
@@ -27,6 +25,62 @@ for line in data:
         ascii_chars.append(char)
 
 inverted_ascii_chars = ascii_chars[::-1]
+
+
+class Projection:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.screen = pg.display.set_mode((width, height))
+        self.background = (10, 10, 60)
+        pg.display.set_caption('ASCII 3D EARTH')
+        self.surfaces = {}
+
+    def addSurface(self, name, surface):
+        self.surfaces[name] = surface
+
+    def display(self):
+        self.screen.fill(self.background)
+
+        for surface in self.surfaces.values():
+            i = 0
+            for node in surface.nodes:
+                self.text = inverted_ascii_chars[i]
+                self.text_surface = my_font.render(self.text, False, (0, 255, 0))
+                if i > MAP_WIDTH - 1 and i < (MAP_WIDTH * MAP_HEIGHT - MAP_WIDTH) and node[1] > 0:
+                    self.screen.blit(self.text_surface, (WIDTH / 2 + int(node[0]), HEIGHT / 2 + int(node[2])))
+                i += 1
+
+    def rotateAll(self, theta):
+        for surface in self.surfaces.values():
+            center = surface.findCenter()
+            c = np.cos(theta)
+            s = np.sin(theta)
+            # Rotation around Z axis
+            matrix = np.array([[c, -s, 0, 0],
+                               [s, c, 0, 0],
+                               [0, 0, 1, 0],
+                               [0, 0, 0, 1]])
+            surface.rotate(center, matrix)
+
+
+class Object:
+    def __init__(self):
+        self.nodes = np.ones((0, 4))
+
+    def addNodes(self, node_array):
+        ones_column = np.ones((len(node_array), 1))
+        ones_added = np.hstack((node_array, ones_column))
+        self.nodes = np.vstack((self.nodes, ones_added))
+
+    def findCenter(self):
+        mean = self.nodes.mean(axis=0)
+        return mean
+
+    def rotate(self, center, matrix):
+        for i, node in enumerate(self.nodes):
+            self.nodes[i] = center + np.matmul(matrix, node - center)
+
 
 xyz = []
 
@@ -63,4 +117,4 @@ while running:
     pv.display()
 
     pg.display.update()
-    spin += 0.01 * dt
+    # spin += 0.01 * dt

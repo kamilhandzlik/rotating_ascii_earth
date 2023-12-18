@@ -8,16 +8,27 @@ FPS = 30
 WIDTH = 800
 HEIGHT = 800
 
-R = 250
+R = 220
+R_of_moon = R/3.7
 MAP_WIDTH = 139
 MAP_HEIGHT = 40
+MAP_MOON_WIDTH = 49
+MAP_MOON_HEIGHT = 15
+
+
+black = (0, 0, 0, )
+green = (0, 255, 0)
+blue = (0, 0, 255)
+grey = (100, 100, 100)
+dark_grey = (50, 50, 50)
 
 pg.init()
 
 my_font = pg.font.SysFont('arial', 20)
+my_font_moon = pg.font.SysFont('arial', 12)
 
 with open('image.txt', 'r') as file:
-    data = [file.read().replace('\n', '')]
+    data = [file.read().replace('\n', '').replace(' ', '.')]
 
 ascii_chars = []
 for line in data:
@@ -26,13 +37,22 @@ for line in data:
 
 inverted_ascii_chars = ascii_chars[::-1]
 
+with open('moon.txt', 'r') as file:
+    data = [file.read().replace('\n', '').replace(' ', '.')]
+
+moon_ascii_chars = []
+for line in data:
+    for char in line:
+        moon_ascii_chars.append(char)
+
+inverted_moon_ascii_chars = ascii_chars[::-1]
 
 class Projection:
     def __init__(self, width, height):
         self.width = width
         self.height = height
         self.screen = pg.display.set_mode((width, height))
-        self.background = (10, 10, 60)
+        self.background = black
         pg.display.set_caption('ASCII 3D EARTH')
         self.surfaces = {}
 
@@ -42,14 +62,23 @@ class Projection:
     def display(self):
         self.screen.fill(self.background)
 
-        for surface in self.surfaces.values():
-            i = 0
-            for node in surface.nodes:
-                self.text = inverted_ascii_chars[i]
-                self.text_surface = my_font.render(self.text, False, (0, 255, 0))
-                if i > MAP_WIDTH - 1 and i < (MAP_WIDTH * MAP_HEIGHT - MAP_WIDTH) and node[1] > 0:
-                    self.screen.blit(self.text_surface, (WIDTH / 2 + int(node[0]), HEIGHT / 2 + int(node[2])))
-                i += 1
+        for key, value in self.surfaces.items():
+            if key == 'earth':
+                i = 0
+                for node in value.nodes:
+                    self.text = inverted_ascii_chars[i]
+                    self.text_surface = my_font.render(self.text, False, (blue if self.text == "." else green))
+                    if node[1] >0:
+                        self.screen.blit(self.text_surface, (WIDTH / 2 + int(node[0]), HEIGHT / 2 + int(node[2])))
+                    i += 1
+            elif key == 'moon':
+                j = 0
+                for node in value.nodes:
+                    self.text = inverted_moon_ascii_chars[i]
+                    self.text_surface = my_font.render(self.text, False, (blue if self.text == "." else green))
+                    if j > MAP_MOON_WIDTH - 1 and i < (MAP_MOON_WIDTH * MAP_MOON_HEIGHT - MAP_MOON_WIDTH) and node[1] > 0:
+                        self.screen.blit(self.text_surface, (WIDTH / 2 + int(node[0]), HEIGHT / 2 + int(node[2])))
+                    j += 1
 
     def rotateAll(self, theta):
         for surface in self.surfaces.values():
@@ -93,28 +122,46 @@ for i in range(MAP_HEIGHT + 1):
         z = round(R * cos(lat), 2)
         xyz.append((x, y, z))
 
+xyz_moon = []
+
+for i in range(MAP_MOON_HEIGHT + 1):
+    lat = (pi / MAP_MOON_HEIGHT) * i  #finally found reason image was wrogly displayed i have put "+" instead of "*"
+    for j in range(MAP_MOON_WIDTH + 1):
+        lon = (2 * pi / MAP_MOON_WIDTH) * j
+        x = round(R_of_moon * sin(lat) * cos(lon), 2)
+        y = round(R_of_moon * sin(lat) * sin(lon), 2)
+        z = round(R_of_moon * cos(lat), 2)
+        xyz_moon.append((x, y, z))
+
 spin = 0.01
 running = True
 
 pv = Projection(WIDTH, HEIGHT)
-globe = Object()
-globe_nodes = [i for i in xyz]
-globe.addNodes(np.array(globe_nodes))
-pv.addSurface('globe', globe)
+earth = Object()
+moon = Object()
+earth_nodes = [i for i in xyz]
+moon_nodes = [i for i in xyz_moon]
+earth.addNodes(np.array(earth_nodes))
+moon.addNodes(np.array(moon_nodes))
+pv.addSurface('earth', earth)
+pv.addSurface('moon', moon)
+pv.display()
 
 while running:
-    dt = clock.tick(FPS)/10000.0
+    dt = clock.tick(FPS)/1000.0
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
 
+    cs = np.cos(spin)
+    ss = np.sin(spin)
     pv.screen.fill(pv.background)
-    globe.rotate(globe.findCenter(), np.array([[cos(spin), -sin(spin), 0, 0],
-                                               [sin(spin), cos(spin), 0, 0],
+    earth.rotate(earth.findCenter(), np.array([[cs, -ss, 0, 0],
+                                               [ss, cs, 0, 0],
                                                [0, 0, 1, 0],
                                                [0, 0, 0, 1]]))
     pv.display()
 
     pg.display.update()
-    spin += 0.01 * dt
+    # spin += 0.01 * dt
