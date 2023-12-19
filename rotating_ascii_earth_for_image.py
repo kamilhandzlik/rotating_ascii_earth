@@ -74,23 +74,49 @@ class Projection:
             elif key == 'moon':
                 j = 0
                 for node in value.nodes:
-                    self.text = inverted_moon_ascii_chars[i]
-                    self.text_surface = my_font.render(self.text, False, (blue if self.text == "." else green))
-                    if j > MAP_MOON_WIDTH - 1 and i < (MAP_MOON_WIDTH * MAP_MOON_HEIGHT - MAP_MOON_WIDTH) and node[1] > 0:
+                    self.text = inverted_moon_ascii_chars[j]
+                    self.text_surface = my_font.render(self.text, False, (grey if self.text == "0" else grey))
+                    if j > MAP_MOON_WIDTH - 1 and j < (MAP_MOON_WIDTH * MAP_MOON_HEIGHT - MAP_MOON_WIDTH) and node[1] > 0:
                         self.screen.blit(self.text_surface, (WIDTH / 2 + int(node[0]), HEIGHT / 2 + int(node[2])))
                     j += 1
 
-    def rotateAll(self, theta):
-        for surface in self.surfaces.values():
-            center = surface.findCenter()
-            c = np.cos(theta)
-            s = np.sin(theta)
+    def moveAll(self, theta):
+        for key, value in self.surfaces.items():
+            if key == 'earth':
+                center = value.findCenter()
+                c = np.cos(theta)
+                s = np.sin(theta)
             # Rotation around Z axis
-            matrix = np.array([[c, -s, 0, 0],
-                               [s, c, 0, 0],
-                               [0, 0, 1, 0],
-                               [0, 0, 0, 1]])
-            surface.rotate(center, matrix)
+                rotate_matrix = np.array([[c, -s, 0, 0],
+                                   [s, c, 0, 0],
+                                   [0, 0, 1, 0],
+                                   [0, 0, 0, 1]])
+                value.rotate(center, rotate_matrix)
+
+            elif key == 'moon':
+                center = value.findCenter()
+                c = np.cos(theta)
+                s = np.sin(theta)
+            # Rotation around Z axis
+                rotate_matrix = np.array([[c, -s, 0, 0],
+                                   [s, c, 0, 0],
+                                   [0, 0, 1, 0],
+                                   [0, 0, 0, 1]])
+                
+                dx = R * 2 * np.cos(theta)
+                dy = R * 2 * np.sin(theta)
+                dz = 0
+            #Transformation matrix
+            transform_matrix = np.array([1, 0, 0, 0],
+                                        [0, 1, 0, 0],
+                                        [0, 0, 1, 0],
+                                        [dx, dy, dz, 1])
+
+            value.rotate(center, rotate_matrix)
+            value.rotate(center, rotate_matrix)
+
+                
+
 
 
 class Object:
@@ -109,6 +135,9 @@ class Object:
     def rotate(self, center, matrix):
         for i, node in enumerate(self.nodes):
             self.nodes[i] = center + np.matmul(matrix, node - center)
+
+    def transform(self,  matrix):
+        self.nodes = np.dot(self.nodes, matrix)
 
 
 xyz = []
