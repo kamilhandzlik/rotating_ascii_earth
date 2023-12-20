@@ -68,7 +68,7 @@ class Projection:
                 for node in value.nodes:
                     self.text = inverted_ascii_chars[i]
                     self.text_surface = my_font.render(self.text, False, (blue if self.text == "." else green))
-                    if node[1] >0:
+                    if i > MAP_HEIGHT - 1 and i < (MAP_WIDTH * MAP_HEIGHT - MAP_WIDTH) and node[1] >0:
                         self.screen.blit(self.text_surface, (WIDTH / 2 + int(node[0]), HEIGHT / 2 + int(node[2])))
                     i += 1
             elif key == 'moon':
@@ -111,9 +111,24 @@ class Projection:
                                         [0, 1, 0, 0],
                                         [0, 0, 1, 0],
                                         [dx, dy, dz, 1])
+            scale_a = 0.5
+            scale_b = 1
+            scale_c = scale_a -scale_b
+            scale_d = scale_c/2
+
+            if dy != 0:
+                sx = sy =sz = (scale_c +scale_d) + (scale_d / (R * 2)) * dy
+            else:
+                sx = sy =sz = (scale_c + scale_d)
+            #Scaling coordinates
+            scale_matrix = np.array([[sx, 0, 0, 0],
+                                     [0, sy, 0, 0],
+                                     [0, 0, sz, 0],
+                                     [0, 0, 0, 1]])
 
             value.rotate(center, rotate_matrix)
             value.rotate(center, rotate_matrix)
+            value.scale(center, scale_matrix)
 
                 
 
@@ -138,6 +153,10 @@ class Object:
 
     def transform(self,  matrix):
         self.nodes = np.dot(self.nodes, matrix)
+
+    def scale(self, center, matrix):
+        for i, node in enumerate(self.nodes):
+            self.nodes[i] = center + np.matmul(matrix, node - center)
 
 
 xyz = []
