@@ -107,14 +107,14 @@ class Projection:
                 dy = R * 2 * np.sin(theta)
                 dz = 0
             #Transformation matrix
-            transform_matrix = np.array([1, 0, 0, 0],
-                                        [0, 1, 0, 0],
-                                        [0, 0, 1, 0],
-                                        [dx, dy, dz, 1])
-            scale_a = 0.5
-            scale_b = 1
-            scale_c = scale_a -scale_b
-            scale_d = scale_c/2
+                transform_matrix = np.array([[1, 0, 0, 0],
+                                            [0, 1, 0, 0],
+                                            [0, 0, 1, 0],
+                                            [dx, dy, dz, 1]])
+                scale_a = 0.5
+                scale_b = 1
+                scale_c = scale_a -scale_b
+                scale_d = scale_c/2
 
             if dy != 0:
                 sx = sy =sz = (scale_c +scale_d) + (scale_d / (R * 2)) * dy
@@ -173,7 +173,7 @@ for i in range(MAP_HEIGHT + 1):
 xyz_moon = []
 
 for i in range(MAP_MOON_HEIGHT + 1):
-    lat = (pi / MAP_MOON_HEIGHT) * i  #finally found reason image was wrogly displayed i have put "+" instead of "*"
+    lat = (pi / MAP_MOON_HEIGHT) * i  
     for j in range(MAP_MOON_WIDTH + 1):
         lon = (2 * pi / MAP_MOON_WIDTH) * j
         x = round(R_of_moon * sin(lat) * cos(lon), 2)
@@ -181,35 +181,28 @@ for i in range(MAP_MOON_HEIGHT + 1):
         z = round(R_of_moon * cos(lat), 2)
         xyz_moon.append((x, y, z))
 
-spin = 0.01
+spin = 0.00001
 running = True
 
-pv = Projection(WIDTH, HEIGHT)
-earth = Object()
-moon = Object()
-earth_nodes = [i for i in xyz]
-moon_nodes = [i for i in xyz_moon]
-earth.addNodes(np.array(earth_nodes))
-moon.addNodes(np.array(moon_nodes))
-pv.addSurface('earth', earth)
-pv.addSurface('moon', moon)
-pv.display()
 
 while running:
-    dt = clock.tick(FPS)/1000.0
+
+    clock.tick(FPS)
+
+    pv = Projection(WIDTH, HEIGHT)
+    earth = Object()
+    moon = Object()
+    earth_nodes = [i for i in xyz]
+    moon_nodes = [i for i in xyz_moon]
+    earth.addNodes(np.array(earth_nodes))
+    moon.addNodes(np.array(moon_nodes))
+    pv.addSurface('earth', earth)
+    pv.addSurface('moon', moon)
+    pv.display()
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
 
-    cs = np.cos(spin)
-    ss = np.sin(spin)
-    pv.screen.fill(pv.background)
-    earth.rotate(earth.findCenter(), np.array([[cs, -ss, 0, 0],
-                                               [ss, cs, 0, 0],
-                                               [0, 0, 1, 0],
-                                               [0, 0, 0, 1]]))
-    pv.display()
-
     pg.display.update()
-    # spin += 0.01 * dt
+    # spin += 0.05
