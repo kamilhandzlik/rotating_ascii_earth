@@ -45,7 +45,7 @@ for line in data:
     for char in line:
         moon_ascii_chars.append(char)
 
-inverted_moon_ascii_chars = ascii_chars[::-1]
+inverted_moon_ascii_chars = moon_ascii_chars[::-1]
 
 class Projection:
     def __init__(self, width, height):
