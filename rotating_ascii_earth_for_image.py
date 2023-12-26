@@ -181,7 +181,7 @@ for i in range(MAP_MOON_HEIGHT + 1):
         z = round(R_of_moon * cos(lat), 2)
         xyz_moon.append((x, y, z))
 
-spin = 0.00001
+spin = 0.0001
 running = True
 
 
